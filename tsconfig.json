@@ -18,6 +18,17 @@
     "skipLibCheck": true,
     "strict": true,
     "strictPropertyInitialization": false,
-    "types": ["vitest/globals", "node"]
+    "types": ["vitest/globals", "node"],
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowUnreachableCode": false,
+
+    "noEmitOnError": true,
+
+     "verbatimModuleSyntax": true,             // явный import type; в Nest может конфликтовать с emitDecoratorMetadata
+     "noUnusedLocals": true,                   // обычно это ловит линтер (oxlint)
+     "noUnusedParameters": true
   }
 }

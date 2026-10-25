@@ -1,0 +1,16 @@
+enum Genders {
+  MALE
+  FEMALE
+}
+
+enum MaritalStatuses {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+}
+
+enum UserRoles {
+  USER
+  ADMIN
+}
