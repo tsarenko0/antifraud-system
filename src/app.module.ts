@@ -3,6 +3,7 @@ import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { PrismaModule } from './modules/prisma/prisma.module.js';
+import { HealthModule } from './modules/health/health.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -14,6 +15,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
       serviceId: 'antifrod-system',
     }),
     PrismaModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
