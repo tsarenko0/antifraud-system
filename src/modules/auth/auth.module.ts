@@ -6,10 +6,12 @@ import { HashModule } from '../hash/hash.module.js';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { jwtConfig } from '../../configs/jwt.config.js';
+import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
   imports: [
     PrismaModule,
     HashModule,
