@@ -7,14 +7,15 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { PASSWORD_MAX_LEN, PASSWORD_MIN_LEN } from '../auth.constants.js';
 
-export class CreateDto {
+export class RegisterDto {
   @IsEmail()
   email: string;
 
   @IsString()
-  @MinLength(8)
-  @MaxLength(72)
+  @MinLength(PASSWORD_MIN_LEN)
+  @MaxLength(PASSWORD_MAX_LEN)
   password: string;
 
   @IsString()

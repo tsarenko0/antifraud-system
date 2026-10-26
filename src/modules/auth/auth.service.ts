@@ -5,7 +5,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CreateDto } from './dto/create.dto.js';
+import { RegisterDto } from './dto/register.dto.js';
 import { HashService } from '../hash/hash.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { JwtService } from '@nestjs/jwt';
@@ -21,7 +21,10 @@ import {
   USER_EMAIL_EXISTS_E,
   REFRESH_USER_NOT_EXISTS_E,
   USER_REFRESH_NOT_FOUND_E,
+  USER_EMAIL_NOT_EXISTS_E,
+  WRONG_PASSWORD_E,
 } from './auth.constants.js';
+import type { LoginDto } from './dto/login.dto.js';
 
 @Injectable()
 export class AuthService {
@@ -31,7 +34,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     @Inject(CACHE_MANAGER) private readonly cacheService: CacheService,
   ) {}
-  async create({ email, password, ...rest }: CreateDto) {
+  async register({ email, password, ...rest }: RegisterDto) {
     const exists = await this.prisma.users.findUnique({
       where: {
         email,
@@ -72,6 +75,21 @@ export class AuthService {
       },
     });
     if (!user) throw new UnauthorizedException(REFRESH_USER_NOT_EXISTS_E);
+
+    return this.issueTokens(user);
+  }
+
+  async login({ email, password }: LoginDto) {
+    const user = await this.prisma.users.findUnique({
+      where: {
+        email,
+      },
+    });
+    if (!user) throw new UnauthorizedException(USER_EMAIL_NOT_EXISTS_E);
+
+    if (!(await this.hashService.verifyPassword(password, user.passwordHash))) {
+      throw new UnauthorizedException(WRONG_PASSWORD_E);
+    }
 
     return this.issueTokens(user);
   }
