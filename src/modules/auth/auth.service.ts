@@ -94,6 +94,12 @@ export class AuthService {
     return this.issueTokens(user);
   }
 
+  async logout(refreshToken: string | undefined) {
+    await this.cacheService.del(
+      getRefreshCacheKey(this.hashService.hashRefresh(refreshToken ?? '')),
+    );
+  }
+
   private async issueTokens(user: Users): Promise<ITokens> {
     const accessToken = await this.jwtService.signAsync({
       sub: user.id,

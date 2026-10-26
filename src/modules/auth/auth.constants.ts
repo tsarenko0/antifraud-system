@@ -8,6 +8,7 @@ export const REFRESH_USER_NOT_EXISTS_E =
   "User connected with this refresh token doesn't exist now.";
 export const USER_EMAIL_NOT_EXISTS_E = "User with this email doesn't exist";
 export const WRONG_PASSWORD_E = 'Wrong password';
+export const USER_ALREADY_LOGGED_OUT_E = 'User already logged out';
 
 export const PASSWORD_MIN_LEN = 8;
 export const PASSWORD_MAX_LEN = 72;

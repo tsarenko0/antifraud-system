@@ -48,4 +48,13 @@ export class AuthController {
 
     return rest;
   }
+
+  @Post('logout')
+  async logout(
+    @Req() req: e.Request,
+    @Res({ passthrough: true }) res: e.Response,
+  ) {
+    res.clearCookie(REFRESH_TOKEN);
+    return this.authService.logout(req.cookies[REFRESH_TOKEN]);
+  }
 }
