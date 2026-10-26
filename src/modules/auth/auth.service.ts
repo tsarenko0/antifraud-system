@@ -1,4 +1,10 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateDto } from './dto/create.dto.js';
 import { HashService } from '../hash/hash.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -9,6 +15,13 @@ import { CACHE_MANAGER, Cache as CacheService } from '@nestjs/cache-manager';
 import { randomUUID } from 'node:crypto';
 import type { ITokens } from './interfaces/tokens.interface.js';
 import type { Users } from '../../generated/prisma/client.js';
+import {
+  getRefreshCacheKey,
+  REFRESH_NOT_FOUND_E,
+  USER_EMAIL_EXISTS_E,
+  REFRESH_USER_NOT_EXISTS_E,
+  USER_REFRESH_NOT_FOUND_E,
+} from './auth.constants.js';
 
 @Injectable()
 export class AuthService {
@@ -25,7 +38,7 @@ export class AuthService {
       },
     });
     if (exists) {
-      throw new ConflictException('User with this email already exists');
+      throw new ConflictException(USER_EMAIL_EXISTS_E);
     }
 
     const passwordHash = await this.hashService.hashPassword(password);
@@ -44,16 +57,35 @@ export class AuthService {
     };
   }
 
-  async issueTokens(user: Users): Promise<ITokens> {
+  async refresh(refreshToken: string | undefined) {
+    if (!refreshToken) throw new NotFoundException(REFRESH_NOT_FOUND_E);
+
+    const refreshHash = this.hashService.hashRefresh(refreshToken);
+    const userId = await this.cacheService.get<string>(
+      getRefreshCacheKey(refreshHash),
+    );
+
+    if (!userId) throw new UnauthorizedException(USER_REFRESH_NOT_FOUND_E);
+    const user = await this.prisma.users.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    if (!user) throw new UnauthorizedException(REFRESH_USER_NOT_EXISTS_E);
+
+    return this.issueTokens(user);
+  }
+
+  private async issueTokens(user: Users): Promise<ITokens> {
     const accessToken = await this.jwtService.signAsync({
       sub: user.id,
       role: user.role,
     });
     const refreshToken = randomUUID();
-    const refreshHash = await this.hashService.hashRefresh(refreshToken);
+    const refreshHash = this.hashService.hashRefresh(refreshToken);
 
     await this.cacheService.set(
-      `refresh:${refreshHash}`,
+      getRefreshCacheKey(refreshHash),
       user.id,
       1000 * 60 * 60 * 24 * 7,
     );
