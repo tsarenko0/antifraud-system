@@ -1,19 +1,24 @@
-import { IsEnum, IsInt, IsString } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 import { Genders, MaritalStatuses } from '../../../generated/prisma/enums.js';
 
 export class UserUpdatableFieldsDto {
   @IsString()
-  fullName: string;
+  @IsOptional()
+  fullName?: string;
 
   @IsString()
-  region: string;
+  @IsOptional()
+  region?: string;
 
   @IsEnum(Genders)
-  gender: Genders;
+  @IsOptional()
+  gender?: Genders;
 
+  @IsOptional()
   @IsInt()
-  age: number;
+  age?: number;
 
   @IsEnum(MaritalStatuses)
-  maritalStatus: MaritalStatuses;
+  @IsOptional()
+  maritalStatus?: MaritalStatuses;
 }

@@ -10,23 +10,28 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { IUserIdentifier } from './interfaces/user-identifier.interface.js';
 import { USER_EMAIL_EXISTS_E } from '../auth/auth.constants.js';
 import { UserUpdatableFieldsDto } from './dto/user-updatable-fields.dto.js';
-import { Users } from '../../generated/prisma/client.js';
+import { getSafeUserUtil } from '../../utils/get-safe-user.util.js';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll(page: number = 0) {
+  findMany(page: number = 0) {
     return this.prisma.users.findMany({
       skip: page * USERS_PAGE_LEN,
       take: USERS_PAGE_LEN,
+      omit: {
+        passwordHash: true,
+      },
     });
   }
 
-  findOne(identifier: IUserIdentifier) {
-    return this.prisma.users.findUnique({
+  async findOne(identifier: IUserIdentifier) {
+    const user = await this.prisma.users.findUnique({
       where: identifier,
     });
+    if (!user) return null;
+    return getSafeUserUtil(user);
   }
 
   async create(data: CreateUserDto) {
@@ -36,31 +41,34 @@ export class UsersService {
       },
     });
     if (exists) throw new ConflictException(USER_EMAIL_EXISTS_E);
-    return this.prisma.users.create({
-      data,
-    });
+    return getSafeUserUtil(
+      await this.prisma.users.create({
+        data,
+      }),
+    );
   }
 
-  delete(identifier: IUserIdentifier) {
+  async delete(identifier: IUserIdentifier) {
     try {
-      return this.prisma.users.delete({
+      const user = await this.prisma.users.delete({
         where: identifier,
       });
+      if (!user) return null;
+      return getSafeUserUtil(user);
     } catch (e) {
       if (isP2025(e)) throw new NotFoundException(USER_NOT_FOUND_E);
       throw e;
     }
   }
 
-  update(
-    identifier: IUserIdentifier,
-    data: UserUpdatableFieldsDto,
-  ): Promise<Users> {
+  async update(identifier: IUserIdentifier, data: UserUpdatableFieldsDto) {
     try {
-      return this.prisma.users.update({
+      const user = await this.prisma.users.update({
         where: identifier,
         data,
       });
+      if (!user) return null;
+      return getSafeUserUtil(user);
     } catch (e) {
       if (isP2025(e)) throw new NotFoundException(USER_NOT_FOUND_E);
       throw e;
