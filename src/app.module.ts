@@ -9,6 +9,7 @@ import { AuthModule } from './modules/auth/auth.module.js';
 import { HashModule } from './modules/hash/hash.module.js';
 import { CacheModule } from '@nestjs/cache-manager';
 import { cacheConfig } from './configs/cache.config.js';
+import { UsersModule } from './modules/users/users.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -29,6 +30,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
       inject: [ConfigService],
       useFactory: cacheConfig
     }),
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

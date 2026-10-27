@@ -27,7 +27,7 @@
 
     "noEmitOnError": true,
 
-     "verbatimModuleSyntax": true,             // явный import type; в Nest может конфликтовать с emitDecoratorMetadata
+     "verbatimModuleSyntax": false,             // явный import type; в Nest может конфликтовать с emitDecoratorMetadata
      "noUnusedLocals": true,                   // обычно это ловит линтер (oxlint)
      "noUnusedParameters": true,
   }
